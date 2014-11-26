@@ -11,13 +11,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = MinimapView
 TEMPLATE = app
 
-LIBS += ../stormlib/libstorm.a
+LIBS += ../casclib/libcasc.a
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mapview.cpp
+    mapview.cpp \
+    maploader.cpp \
+    cascstorage.cpp
 
 HEADERS  += mainwindow.h \
-    mapview.h
+    mapview.h \
+    maploader.h \
+    cascstorage.h
 
 FORMS    += mainwindow.ui

@@ -1,11 +1,12 @@
 #ifndef MAPVIEW_H
 #define MAPVIEW_H
 
-#include <QGraphicsView>
+#include <QGraphicsScene>
 
-class MapView : public QGraphicsView
+class MapView : public QGraphicsScene
 {
       Q_OBJECT
+
    public:
       explicit MapView(QObject *parent = 0);
 
