@@ -1,0 +1,4 @@
+#ifndef CASCSTORAGE_P_H
+#define CASCSTORAGE_P_H
+
+#endif // CASCSTORAGE_P_H
