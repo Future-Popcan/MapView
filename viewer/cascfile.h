@@ -1,17 +1,46 @@
 #ifndef CASCFILE_H
 #define CASCFILE_H
 
-#include <QFileDevice>
+#include <QIODevice>
+#include <QExplicitlySharedDataPointer>
 
-class CascFile : public QFileDevice
+class CascStorage;
+
+class CascFilePrivate;
+class CascFile : public QIODevice
 {
       Q_OBJECT
+
    public:
-      explicit CascFile(QObject *parent = 0);
+      CascFile(QObject* parent = 0);
+      ~CascFile();
+
+      void        setStorage(const CascStorage& storage);
+      CascStorage storage();
+
+      void        setFileName(const QString& path);
+      QString     fileName() const;
+
+      void        setLocale(const QLocale& locale);
+      QLocale     locale() const;
+
+      virtual bool seek(qint64 pos);
+
+      virtual qint64 bytesAvailable() const;
+
+      virtual bool open(OpenMode mode);
+      virtual void close();
+
+   protected:
+      virtual qint64 readData(char *data,          qint64 maxlen);
+      virtual qint64 writeData(const char *data,   qint64 len);
 
    signals:
 
    public slots:
+
+   private:
+      QExplicitlySharedDataPointer<CascFilePrivate> d;
 
 };
 

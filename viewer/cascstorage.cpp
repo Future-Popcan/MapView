@@ -1,109 +1,101 @@
 #include "cascstorage.h"
+#include "cascstorage_p.h"
 
-#include "../casclib/src/CascLib.h"
-#include "../casclib/src/common/Common.h"
+CascStoragePrivate::CascStoragePrivate()
+   : QSharedData(),
+   hStorage(0)
+{
+}
 
-class CascStoragePrivate : public QSharedData {
-   public:
-      HANDLE   hStorage;
-      QString  lastError;
-      QString  path;
+CascStoragePrivate::~CascStoragePrivate(){
 
-      CascStoragePrivate(){
-         this->hStorage = 0;
-      }
+}
 
-      ~CascStoragePrivate(){
+bool CascStoragePrivate::openStorage(const QString& path){
+   if(CascOpenStorage(path.toLatin1().data(), 0, &this->hStorage)){
+      this->lastError.clear();
+      this->path = path;
+      return true;
+   }
 
-      }
+   this->path.clear();
+   this->lastError = this->translateError(GetLastError());
+   return false;
+}
 
-      bool openStorage(const QString& path){
-         if(CascOpenStorage(path.toLatin1().data(), 0, &this->hStorage)){
-            this->setError(ERROR_SUCCESS);
-            this->path = path;
-            return true;
-         }
+void CascStoragePrivate::closeStorage(){
+   if(this->hStorage){
+      CascCloseStorage(this->hStorage);
+      this->hStorage = 0;
+   }
+}
 
-         this->path.clear();
-         this->setError(GetLastError());
-         return false;
-      }
+QString CascStoragePrivate::translateError(int code){
+   switch(code){
+      case ERROR_SUCCESS:
+         return QString();
 
-      void closeStorage(){
-         if(this->hStorage){
-            CascCloseStorage(this->hStorage);
-            this->hStorage = 0;
-         }
-      }
+      case ERROR_FILE_NOT_FOUND:
+         return CascStorage::tr("File not found");
 
-      void setError(int code){
-         switch(code){
-            case ERROR_SUCCESS:
-               this->lastError.clear();
-               break;
+      case ERROR_ACCESS_DENIED:
+         return CascStorage::tr("Access denied");
 
-            case ERROR_FILE_NOT_FOUND:
-               this->lastError = CascStorage::tr("File not found");
-               break;
+      case ERROR_INVALID_HANDLE:
+         return CascStorage::tr("Invalid handle");
 
-            case ERROR_ACCESS_DENIED:
-               this->lastError = CascStorage::tr("Access denied");
-               break;
+      case ERROR_NOT_ENOUGH_MEMORY:
+         return CascStorage::tr("Out of memory");
 
-            case ERROR_INVALID_HANDLE:
-               this->lastError = CascStorage::tr("Invalid handle");
-               break;
+      case ERROR_NOT_SUPPORTED:
+         return CascStorage::tr("Not supported");
 
-            case ERROR_NOT_ENOUGH_MEMORY:
-               this->lastError = CascStorage::tr("Out of memory");
-               break;
+      case ERROR_INVALID_PARAMETER:
+         return CascStorage::tr("FInvalid parameter");
 
-            case ERROR_NOT_SUPPORTED:
-               this->lastError = CascStorage::tr("Not supported");
-               break;
+      case ERROR_DISK_FULL:
+         return CascStorage::tr("Disk full");
 
-            case ERROR_INVALID_PARAMETER:
-               this->lastError = CascStorage::tr("FInvalid parameter");
-               break;
+      case ERROR_ALREADY_EXISTS:
+         return CascStorage::tr("File already existing");
 
-            case ERROR_DISK_FULL:
-               this->lastError = CascStorage::tr("Disk full");
-               break;
+      case ERROR_INSUFFICIENT_BUFFER:
+         return CascStorage::tr("Insufficient buffer space");
 
-            case ERROR_ALREADY_EXISTS:
-               this->lastError = CascStorage::tr("File already existing");
-               break;
+      case ERROR_BAD_FORMAT:
+         return CascStorage::tr("Bad format");
 
-            case ERROR_INSUFFICIENT_BUFFER:
-               this->lastError = CascStorage::tr("Insufficient buffer space");
-               break;
+      case ERROR_NO_MORE_FILES:
+         return CascStorage::tr("No more files");
 
-            case ERROR_BAD_FORMAT:
-               this->lastError = CascStorage::tr("Bad format");
-               break;
+      case ERROR_HANDLE_EOF:
+         return CascStorage::tr("End of file");
 
-            case ERROR_NO_MORE_FILES:
-               this->lastError = CascStorage::tr("No more files");
-               break;
+      case ERROR_CAN_NOT_COMPLETE:
+         return CascStorage::tr("Can not complete");
 
-            case ERROR_HANDLE_EOF:
-               this->lastError = CascStorage::tr("End of file");
-               break;
+      case ERROR_FILE_CORRUPT:
+         return CascStorage::tr("File corrupt");
+   }
 
-            case ERROR_CAN_NOT_COMPLETE:
-               this->lastError = CascStorage::tr("Can not complete");
-               break;
+   return QString();
+}
 
-            case ERROR_FILE_CORRUPT:
-               this->lastError = CascStorage::tr("File corrupt");
-               break;
-         }
-      }
-};
+CascStorage::CascStorage(CascStoragePrivate* priv)
+   : QObject(0),
+     d(priv)
+{
+}
 
 CascStorage::CascStorage(QObject *parent) :
    QObject(parent),
    d(new CascStoragePrivate)
+{
+}
+
+CascStorage::CascStorage(const CascStorage& other) :
+   QObject(0),
+   d(other.d)
 {
 }
 
