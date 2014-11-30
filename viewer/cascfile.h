@@ -26,6 +26,7 @@ class CascFile : public QIODevice
 
       virtual bool seek(qint64 pos);
 
+      virtual bool atEnd() const;
       virtual qint64 bytesAvailable() const;
 
       virtual bool open(OpenMode mode);

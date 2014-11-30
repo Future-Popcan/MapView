@@ -155,6 +155,8 @@ QLocale CascFile::locale() const{
 }
 
 bool CascFile::seek(qint64 pos){
+   QMutexLocker lock(&d->Storage->Lock);
+
    int loPos = pos & 0xFFFFFFFF;
    int hiPos = pos >> 32 & 0xFFFFFFFF;
 
@@ -169,14 +171,23 @@ bool CascFile::seek(qint64 pos){
    return QIODevice::seek(pos);
 }
 
+bool CascFile::atEnd() const{
+   if(!this->bytesAvailable())
+      return true;
+
+   return false;
+}
+
 qint64 CascFile::bytesAvailable() const{
+   QMutexLocker lock(&d->Storage->Lock);
+
    if(!this->isOpen())
       return QIODevice::bytesAvailable();
 
    DWORD hiSize;
    DWORD loSize = CascGetFileSize(d->FileHandle, &hiSize);
 
-   return qint64(hiSize) << 32 | loSize;
+   return (qint64(hiSize) << 32 | loSize) - this->pos();
 }
 
 bool CascFile::open(OpenMode mode){
@@ -198,14 +209,16 @@ bool CascFile::open(OpenMode mode){
    if(!QIODevice::open(mode))
       return false;
 
+   QMutexLocker lock(&d->Storage->Lock);
+
    if(!CascOpenFile(d->Storage->hStorage,
                     d->FileName.toLatin1().data(),
                     d->cascLocale(),
                     STREAM_FLAG_READ_ONLY,
                     &d->FileHandle)){
 
+      QIODevice::close();
       this->setErrorString(d->Storage->translateError(GetLastError()));
-      this->close();
 
       return false;
    }
@@ -214,6 +227,8 @@ bool CascFile::open(OpenMode mode){
 }
 
 void CascFile::close(){
+   QMutexLocker lock(&d->Storage->Lock);
+
    if(d->FileHandle){
       CascCloseFile(d->FileHandle);
       d->FileHandle = 0;
@@ -223,6 +238,8 @@ void CascFile::close(){
 }
 
 qint64 CascFile::readData(char *data, qint64 maxlen){
+   QMutexLocker lock(&d->Storage->Lock);
+
    quint32 readLen = maxlen & 0xFFFFFFFF;
    quint32 read = 0;
 

@@ -21,6 +21,8 @@ class CascStorage : public QObject
       CascStorage(const CascStorage& other);
       ~CascStorage();
 
+      CascStorage& operator=(const CascStorage& rh);
+
       bool     open(const QString& path);
       void     close();
       bool     isOpen() const;

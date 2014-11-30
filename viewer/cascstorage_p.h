@@ -12,6 +12,7 @@ class CascStoragePrivate : public QSharedData {
       HANDLE   hStorage;
       QString  lastError;
       QString  path;
+      QMutex   Lock;
 
       CascStoragePrivate();
       ~CascStoragePrivate();

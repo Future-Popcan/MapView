@@ -3,7 +3,8 @@
 
 CascStoragePrivate::CascStoragePrivate()
    : QSharedData(),
-   hStorage(0)
+   hStorage(0),
+   Lock(QMutex::Recursive)
 {
 }
 
@@ -12,6 +13,8 @@ CascStoragePrivate::~CascStoragePrivate(){
 }
 
 bool CascStoragePrivate::openStorage(const QString& path){
+   QMutexLocker lock(&this->Lock);
+
    if(CascOpenStorage(path.toLatin1().data(), 0, &this->hStorage)){
       this->lastError.clear();
       this->path = path;
@@ -24,6 +27,8 @@ bool CascStoragePrivate::openStorage(const QString& path){
 }
 
 void CascStoragePrivate::closeStorage(){
+   QMutexLocker lock(&this->Lock);
+
    if(this->hStorage){
       CascCloseStorage(this->hStorage);
       this->hStorage = 0;
@@ -103,6 +108,13 @@ CascStorage::~CascStorage(){
 
 }
 
+CascStorage& CascStorage::operator=(const CascStorage& rh){
+   QMutexLocker lock(&rh.d->Lock);
+
+   this->d = rh.d;
+   return *this;
+}
+
 bool CascStorage::open(const QString& path){
    return d->openStorage(path);
 }
@@ -112,13 +124,19 @@ void CascStorage::close(){
 }
 
 bool CascStorage::isOpen() const{
+   QMutexLocker lock(&d->Lock);
+
    return d->hStorage != 0;
 }
 
 QString CascStorage::path() const{
+   QMutexLocker lock(&d->Lock);
+
    return d->path;
 }
 
 QString CascStorage::errorString() const{
+   QMutexLocker lock(&d->Lock);
+
    return d->lastError;
 }
