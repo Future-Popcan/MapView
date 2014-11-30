@@ -5,14 +5,16 @@
 #include <QTreeWidgetItem>
 #include <QtConcurrent>
 #include <QFutureWatcher>
+#include <QExplicitlySharedDataPointer>
 
 #include "cascstorage.h"
 
 namespace Ui {
-   class MainWindow;
+   class MapViewerMain;
 }
 
-class MainWindow : public QMainWindow
+class MapViewerMainPrivate;
+class MapViewerMain : public QMainWindow
 {
       Q_OBJECT
 
@@ -24,8 +26,8 @@ class MainWindow : public QMainWindow
       };
 
    public:
-      explicit MainWindow(QWidget *parent = 0);
-      ~MainWindow();
+      explicit MapViewerMain(QWidget *parent = 0);
+      ~MapViewerMain();
 
    protected:
       void showEvent(QShowEvent* event);
@@ -37,9 +39,11 @@ class MainWindow : public QMainWindow
       void tileReady(int index);
 
    private:
+      QExplicitlySharedDataPointer<MapViewerMainPrivate> d;
+
       CascStorage             storage;
       QFutureWatcher<MapTile>  watcher;
-      Ui::MainWindow *ui;
+      Ui::MapViewerMain *ui;
 };
 
 #endif // MAINWINDOW_H

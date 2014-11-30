@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "mapviewermain.h"
+#include "ui_mapviewermain.h"
 
 #include "cascstorage.h"
 #include "cascfile.h"
@@ -13,10 +13,18 @@
 #include <QtConcurrent>
 #include <QImage>
 #include <QGraphicsPixmapItem>
+#include <QSharedData>
+#include <QProgressBar>
 
-MainWindow::MainWindow(QWidget *parent) :
+class MapViewerMainPrivate : public QSharedData {
+public:
+      QProgressBar* ProgressBar;
+};
+
+MapViewerMain::MapViewerMain(QWidget *parent) :
    QMainWindow(parent),
-   ui(new Ui::MainWindow)
+   ui(new Ui::MapViewerMain),
+   d(new MapViewerMainPrivate)
 {
    ui->setupUi(this);
 
@@ -24,14 +32,24 @@ MainWindow::MainWindow(QWidget *parent) :
    ui->mapView->setScene(scene);
 
    connect(&this->watcher, SIGNAL(resultReadyAt(int)), this, SLOT(tileReady(int)));
+
+   d->ProgressBar = new QProgressBar(this);
+   d->ProgressBar->hide();
+
+   connect(&this->watcher, SIGNAL(started()),                     d->ProgressBar, SLOT(show()));
+   connect(&this->watcher, SIGNAL(finished()),                    d->ProgressBar, SLOT(hide()));
+   connect(&this->watcher, SIGNAL(progressRangeChanged(int,int)), d->ProgressBar, SLOT(setRange(int,int)));
+   connect(&this->watcher, SIGNAL(progressValueChanged(int)),     d->ProgressBar, SLOT(setValue(int)));
+
+   ui->statusBar->addPermanentWidget(d->ProgressBar);
 }
 
-MainWindow::~MainWindow()
+MapViewerMain::~MapViewerMain()
 {
    delete ui;
 }
 
-void MainWindow::showEvent(QShowEvent* event){
+void MapViewerMain::showEvent(QShowEvent* event){
    if(!event->spontaneous()){
       if(this->storage.open("/Applications/World of Warcraft/data")){
          qDebug() << "Opened storage!";
@@ -54,6 +72,8 @@ void MainWindow::showEvent(QShowEvent* event){
 
       while(!reader.atEnd()){
          QMap<QString, QVariant> entry = reader.nextRow();
+
+         qDebug() << entry["Directory"].toString();
 
          if(entry["ParentMapId"].toInt() == -1){
             QTreeWidgetItem* item = new QTreeWidgetItem();
@@ -125,7 +145,7 @@ QRgb toRgb(quint16 color){
    return qRgba(r, g, b, 255);
 }
 
-MainWindow::MapTile  mapTile(const TileRequest& tile){
+MapViewerMain::MapTile  mapTile(const TileRequest& tile){
    //qDebug() << "Load: " << tile[0];
    CascFile file;
    file.setStorage(tile.Storage);
@@ -139,7 +159,7 @@ MainWindow::MapTile  mapTile(const TileRequest& tile){
 
       if(QLatin1String((char*)&header.Magic, 4) != "BLP2"){
          qWarning() << "Invalid blp header!";
-         return MainWindow::MapTile();
+         return MapViewerMain::MapTile();
       }
       //qDebug() << "Reading: " << tile.Path;
 
@@ -283,17 +303,17 @@ MainWindow::MapTile  mapTile(const TileRequest& tile){
          }
       }
 
-      MainWindow::MapTile tileResult;
+      MapViewerMain::MapTile tileResult;
       tileResult.Pos    = tile.Pos;
       tileResult.Image  = QPixmap::fromImage(image);
       tileResult.Walls  = QPixmap::fromImage(borderImage);
       return tileResult;
    }
 
-   return MainWindow::MapTile();
+   return MapViewerMain::MapTile();
 }
 
-void MainWindow::tileReady(int index){
+void MapViewerMain::tileReady(int index){
    MapTile tile = this->watcher.resultAt(index);
 
    QGraphicsPixmapItem* item = ui->mapView->scene()->addPixmap(tile.Image);
@@ -306,7 +326,7 @@ void MainWindow::tileReady(int index){
    wallItem->setToolTip(QString("%1 / %2").arg(tile.Pos.x()).arg(tile.Pos.y()));
 }
 
-void MainWindow::on_mapTree_itemClicked(QTreeWidgetItem *item, int column)
+void MapViewerMain::on_mapTree_itemClicked(QTreeWidgetItem *item, int column)
 {
    if(this->watcher.isRunning())
       this->watcher.cancel();

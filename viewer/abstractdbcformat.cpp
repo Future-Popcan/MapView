@@ -137,7 +137,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
          }
 
          default:
-            qWarning() << "Not implemented field type!";
+            qWarning() << "Unimplemented field type!";
             return QMap<QString, QVariant>();
       }
 

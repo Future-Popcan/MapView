@@ -14,16 +14,16 @@ TEMPLATE = app
 LIBS += ../casclib/libcasc.a
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
     mapview.cpp \
     maploader.cpp \
     cascstorage.cpp \
     cascfile.cpp \
     dbcreader.cpp \
     abstractdbcformat.cpp \
-    dbcmap.cpp
+    dbcmap.cpp \
+    mapviewermain.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
     mapview.h \
     maploader.h \
     cascstorage.h \
@@ -32,6 +32,8 @@ HEADERS  += mainwindow.h \
     dbcreader.h \
     abstractdbcformat.h \
     dbcreader_p.h \
-    dbcmap.h
+    dbcmap.h \
+    mapviewermain.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mapviewermain.ui
