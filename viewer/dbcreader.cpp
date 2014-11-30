@@ -33,7 +33,7 @@ QString DBCReaderPrivate::readString(qint64 offset){
       return QString();
    }
 
-   return QLatin1String((char*)this->StringBlock.data()+offset);
+   return QString::fromUtf8((char*)this->StringBlock.data() + offset);
 }
 
 DBCReader::DBCReader(QIODevice *device) :
