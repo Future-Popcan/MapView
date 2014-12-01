@@ -157,8 +157,10 @@ QLocale CascFile::locale() const{
 bool CascFile::seek(qint64 pos){
    QMutexLocker lock(&d->Storage->Lock);
 
-   int loPos = pos & 0xFFFFFFFF;
-   int hiPos = pos >> 32 & 0xFFFFFFFF;
+   QIODevice::seek(pos);
+
+   LONG loPos = pos & 0xFFFFFFFF;
+   LONG hiPos = pos >> 32 & 0xFFFFFFFF;
 
    if(CascSetFilePointer(d->FileHandle, loPos, &hiPos, FILE_BEGIN) == CASC_INVALID_POS){
       this->setErrorString(tr("Invalid file pos!"));
@@ -168,7 +170,7 @@ bool CascFile::seek(qint64 pos){
       return false;
    }
 
-   return QIODevice::seek(pos);
+   return true;
 }
 
 bool CascFile::atEnd() const{

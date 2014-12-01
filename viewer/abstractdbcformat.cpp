@@ -89,7 +89,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
       switch(field.Type){
          case Integer:{
             qint32 val;
-            d->Reader->device()->read((char*)&val, sizeof(qint32));
+            dataBuffer.read((char*)&val, sizeof(qint32));
 
             variant = val;
             break;
@@ -97,7 +97,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
 
          case Reference:{
             qint32 val;
-            d->Reader->device()->read((char*)&val, sizeof(qint32));
+            dataBuffer.read((char*)&val, sizeof(qint32));
 
             variant = val;
             break;
@@ -105,7 +105,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
 
          case Boolean:{
             quint32 val;
-            d->Reader->device()->read((char*)&val, sizeof(quint32));
+            dataBuffer.read((char*)&val, sizeof(quint32));
 
             variant = val;
             break;
@@ -113,7 +113,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
 
          case Float:{
             float val;
-            d->Reader->device()->read((char*)&val, sizeof(float));
+            dataBuffer.read((char*)&val, sizeof(float));
 
             variant = val;
             break;
@@ -121,7 +121,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
 
          case Double:{
             double val;
-            d->Reader->device()->read((char*)&val, sizeof(double));
+            dataBuffer.read((char*)&val, sizeof(double));
 
             variant = val;
             break;
@@ -130,7 +130,7 @@ QMap<QString, QVariant> AbstractDBCFormat::readRecord(const QByteArray& data) co
          case Localized:
          case String:{
             quint32 offset;
-            d->Reader->device()->read((char*)&offset, sizeof(quint32));
+            dataBuffer.read((char*)&offset, sizeof(quint32));
 
             variant = d->Reader->d->readString(offset);
             break;
