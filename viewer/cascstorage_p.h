@@ -1,8 +1,8 @@
 #ifndef CASCSTORAGE_P_H
 #define CASCSTORAGE_P_H
 
-#include "../casclib/src/CascLib.h"
-#include "../casclib/src/common/Common.h"
+#include "../casclib/remote/src/CascLib.h"
+#include "../casclib/remote/src/common/Common.h"
 
 #include <QSharedData>
 #include <QString>
