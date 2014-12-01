@@ -16,7 +16,7 @@ struct DBCHeader{
 DBCReaderPrivate::DBCReaderPrivate() :
    QSharedData(),
    Device(0),
-   Records(-1),
+   Records(0),
    RecordSize(0),
    FieldCount(0),
    CurrentIndex(0)
@@ -60,7 +60,7 @@ bool DBCReader::atEnd(){
 }
 
 bool DBCReader::isValid(){
-   return d->Records != -1;
+   return d->RecordSize != 0;
 }
 
 void DBCReader::setFormat(const AbstractDBCFormat& format){
@@ -91,7 +91,7 @@ QMap<QString, QVariant> DBCReader::nextRow(){
 
    QByteArray buffer = d->Device->read(d->RecordSize);
 
-   if(buffer.length() < d->RecordSize){
+   if(buffer.length() < (qint64)d->RecordSize){
       qWarning() << "Insufficient bytes read!";
       return QMap<QString, QVariant>();
    }
@@ -107,7 +107,8 @@ void DBCReader::readHeader(){
    DBCHeader header;
    if(d->Device->read((char*)&header, sizeof(DBCHeader)) != sizeof(DBCHeader)){
       qWarning() << "Not a valid file!";
-      d->Records = -1;
+      d->Records = 0;
+      d->RecordSize = 0;
       return;
    }
 
@@ -126,7 +127,8 @@ void DBCReader::readHeader(){
       d->StringBlock = d->Device->read(header.StringblockSize);
    }else{
       qWarning() << "Invalid DBC header!";
-      d->Records = -1;
+      d->Records = 0;
+      d->RecordSize = 0;
       return;
    }
 }

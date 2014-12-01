@@ -10,7 +10,7 @@ class AbstractDBCFormatPrivate : public QSharedData{
    public:
       QVector<AbstractDBCFormat::Field>   Fields;
       AbstractDBCFormat::LocVersion       Version;
-      qint32                              OffsetCount;
+      quint32                             OffsetCount;
       DBCReader*                          Reader;
 
       AbstractDBCFormatPrivate() : QSharedData(){
@@ -64,11 +64,11 @@ bool AbstractDBCFormat::isValid(){
    return d->Version != Invalid;
 }
 
-qint64 AbstractDBCFormat::size(){
+quint32 AbstractDBCFormat::size(){
    return d->OffsetCount;
 }
 
-int AbstractDBCFormat::fieldCount(){
+quint32 AbstractDBCFormat::fieldCount(){
    return d->Fields.count();
 }
 
