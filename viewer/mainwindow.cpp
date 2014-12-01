@@ -308,6 +308,8 @@ void MainWindow::tileReady(int index){
 
 void MainWindow::on_mapTree_itemClicked(QTreeWidgetItem *item, int column)
 {
+   Q_UNUSED(column);
+
    if(this->watcher.isRunning())
       this->watcher.cancel();
 

@@ -46,8 +46,8 @@ class AbstractDBCFormat
       ~AbstractDBCFormat();
 
       bool                    isValid();
-      qint64                  size();
-      int                     fieldCount();
+      quint32                 size();
+      quint32                 fieldCount();
 
       void                    setReader(DBCReader* reader);
       QMap<QString, QVariant> readRecord(const QByteArray& data) const;
